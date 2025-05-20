@@ -7,11 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  test-template:
+  doggy-cat-ci:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project: [project-1, project-2, project-3]
 
     steps:
       - name: Checkout code
@@ -22,11 +19,11 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies for ${{ matrix.project }}
+      - name: Install dependencies
         run: |
-          cd ${{ matrix.project }}
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run minimal tests
+      - name: ✅ Run tests
         run: |
-          PYTHONPATH=${{ matrix.project }} pytest ${{ matrix.project }}/tests
+          pytest tests --maxfail=3 --disable-warnings --tb=short

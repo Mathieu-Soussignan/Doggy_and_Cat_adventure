@@ -1,40 +1,28 @@
 services:
-  project1:
+
+  image-api:
     build:
-      context: ./project-1
+      context: ./api
       dockerfile: Dockerfile
-    container_name: project1
+    container_name: dogcat_image_api
     ports:
-      - "8001:8000"
+      - "8000:8000"
     networks:
-      - myapp-network
+      - dogcat-network
     depends_on:
       - mlflow
 
-  project2:
+  streamlit-app:
     build:
-      context: ./project-2
+      context: ./streamlit_app
       dockerfile: Dockerfile
-    container_name: project2
-    ports:
-      - "8002:8000"
-    networks:
-      - myapp-network
-    depends_on:
-      - mlflow
-
-  project3:
-    build:
-      context: ./project-3
-      dockerfile: Dockerfile
-    container_name: project3
+    container_name: dogcat_streamlit
     ports:
       - "8501:8501"
     networks:
-      - myapp-network
+      - dogcat-network
     depends_on:
-      - project1
-      - project2
+      - image-api
       - mlflow
 
   mlflow:
@@ -43,7 +31,7 @@ services:
     ports:
       - "5000:5000"
     networks:
-      - myapp-network
+      - dogcat-network
     volumes:
       - ./mlruns:/mlflow
     command: >
@@ -58,13 +46,12 @@ services:
     container_name: prometheus
     ports:
       - "9090:9090"
+    networks:
+      - dogcat-network
+    depends_on:
+      - image-api
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    networks:
-      - myapp-network
-    depends_on:
-      - project1
-      - project2
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --web.enable-lifecycle
@@ -77,7 +64,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - myapp-network
+      - dogcat-network
     depends_on:
       - prometheus
     volumes:
@@ -85,7 +72,7 @@ services:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
 
 networks:
-  myapp-network:
+  dogcat-network:
 
 volumes:
   grafana-storage:
